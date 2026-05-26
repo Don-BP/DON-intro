@@ -150,7 +150,7 @@ export function useBallPhysics(
     x: number, y: number, z: number,
     vx: number, vy: number, vz: number
   ) {
-    const BR = 0.56
+    const BR = 0.84
     const { world, scene, bodies, ballMaterial, textures } = s
     const body = new CANNON.Body({
       mass: 1,
@@ -195,7 +195,7 @@ export function useBallPhysics(
   const dropBalls = useCallback((count: number) => {
     const s = sceneRef.current
     if (!s) return
-    const BR = 0.56
+    const BR = 0.84
     const { WORLD_W, FLOOR_Y, DEPTH } = s
     evictOldest(s, count)
     for (let i = 0; i < count; i++) {
@@ -217,7 +217,7 @@ export function useBallPhysics(
   const placeBalls = useCallback((count: number) => {
     const s = sceneRef.current
     if (!s || count === 0) return
-    const BR = 0.56
+    const BR = 0.84
     const { WORLD_W, FLOOR_Y, DEPTH } = s
     evictOldest(s, count)
     for (let i = 0; i < count; i++) {
