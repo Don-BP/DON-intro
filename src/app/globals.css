@@ -1,3 +1,49 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
+@layer base {
+  body {
+    @apply bg-background text-on-surface font-sans;
+  }
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background-color: #c0cab1; border-radius: 4px; }
+}
+
+@layer components {
+  .btn-arcade {
+    @apply relative px-6 py-3 rounded-full font-sans font-extrabold text-label-bold text-on-primary uppercase tracking-wide
+           bg-gradient-to-b from-[#64DD17] to-[#33691E] border-2 border-[#F1F8E9]
+           transition-all duration-75 cursor-pointer select-none;
+    box-shadow: inset 0 6px 8px rgba(255,255,255,0.45), 0 4px 0px #1B5E20, 0 8px 12px rgba(0,0,0,0.2);
+    text-shadow: 0 2px 1px rgba(0,0,0,0.3);
+  }
+  .btn-arcade:active {
+    transform: translateY(4px);
+    box-shadow: inset 0 2px 4px rgba(255,255,255,0.3), 0 0px 0px #1B5E20;
+  }
+
+  .card-arcade {
+    @apply bg-white rounded-2xl border-2 border-surface-variant;
+    box-shadow: 0 4px 0 #c0cab1;
+  }
+
+  .glossy-top::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    height: 40%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.35) 0%, transparent 100%);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .ribbon-arcade {
+    @apply relative flex items-center justify-center h-14 rounded-xl font-extrabold text-white uppercase tracking-widest;
+    background: linear-gradient(180deg, #FFB300 0%, #FF8F00 100%);
+    box-shadow: inset 0 4px 10px rgba(255,255,255,0.4), 0 4px 8px rgba(0,0,0,0.1);
+  }
+}
