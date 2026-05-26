@@ -121,7 +121,7 @@ export const useGameStore = create<GameState>()(
         set((s) => ({
           questions: s.questions.map((q) =>
             q.id === id
-              ? { ...q, fontSize: Math.max(12, Math.min(48, q.fontSize + delta)) }
+              ? { ...q, fontSize: Math.max(12, q.fontSize + delta) }
               : q
           ),
         })),

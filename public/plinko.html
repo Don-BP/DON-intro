@@ -242,7 +242,9 @@
         let walls = [];
         let particles = [];
         let score = 0;
-        let yellowPegHits = 0; 
+        let ballDropped = false;
+        let yellowPegHits = 0;
+        let pendingBonusPoints = 0;
         let lastDropTime = 0;
         const DROP_COOLDOWN = 400; 
 
@@ -528,6 +530,7 @@
 
         function resetYellowCounter() {
             yellowPegHits = 0;
+            pendingBonusPoints = 0;
             document.getElementById('bonus-display').innerText = `0 / ${BONUS_HIT_REQUIREMENT}`;
         }
 
@@ -616,9 +619,9 @@
         }
 
         function onPointerDown(event) {
-            if (event.clientY > window.innerHeight * 0.35) return;
-            const x = (event.clientX / window.innerWidth) * 2 - 1;
-            const worldX = x * (BOARD_WIDTH / 2);
+            if (ballDropped) return;
+            ballDropped = true;
+            const worldX = (Math.random() * 2 - 1) * (BOARD_WIDTH / 2 - BALL_RADIUS * 2);
             spawnBall(worldX);
         }
 
@@ -719,7 +722,12 @@
             score += points;
             document.getElementById('score-display').innerText = score.toLocaleString();
             if (points > 0 && window.parent !== window) {
-                window.parent.postMessage({ type: 'plinko-score', points: points }, '*');
+                window.parent.postMessage({
+                    type: 'plinko-score',
+                    slotPoints: points,
+                    bonusPoints: pendingBonusPoints,
+                    total: points + pendingBonusPoints
+                }, '*');
             }
             
             if (points > 0) {
@@ -734,8 +742,9 @@
 
         function addBonusScore(points) {
             score += points;
+            pendingBonusPoints += points;
             document.getElementById('score-display').innerText = score.toLocaleString();
-            
+
             const popup = document.createElement('div');
             popup.className = 'bonus-popup';
             popup.innerText = `BONUS +${points}`;

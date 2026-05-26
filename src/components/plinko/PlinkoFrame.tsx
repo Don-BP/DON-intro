@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useGameStore } from '@/store/gameStore'
 import { playReturnToBoard, playScoreReveal } from '@/lib/sounds'
@@ -13,16 +13,20 @@ export default function PlinkoFrame({ teamId }: Props) {
   const { teams, addScore, addBalls } = useGameStore()
   const team = teams.find(t => t.id === teamId)
   const hasScored = useRef(false)
+  const [wonPoints, setWonPoints] = useState<{ slot: number; bonus: number; total: number } | null>(null)
 
   useEffect(() => {
     function onMessage(e: MessageEvent) {
       if (e.data?.type !== 'plinko-score') return
-      const points = Number(e.data.points) || 0
-      if (points > 0 && !hasScored.current) {
+      const slot = Number(e.data.slotPoints ?? e.data.points) || 0
+      const bonus = Number(e.data.bonusPoints) || 0
+      const total = Number(e.data.total) || slot
+      if (total > 0 && !hasScored.current) {
         hasScored.current = true
-        addScore(teamId, points)
-        addBalls(teamId, points)
+        addScore(teamId, total)
+        addBalls(teamId, total)
         playScoreReveal()
+        setWonPoints({ slot, bonus, total })
       }
     }
     window.addEventListener('message', onMessage)
@@ -48,13 +52,41 @@ export default function PlinkoFrame({ teamId }: Props) {
       />
 
       {/* Team name overlay */}
-      <div className="absolute top-4 left-4 z-10 flex items-center gap-2
+      <div className="absolute top-4 right-4 z-10 flex items-center gap-2
                       bg-black/50 backdrop-blur-sm rounded-xl px-4 py-2 pointer-events-none">
         <div className="w-3 h-3 rounded-full" style={{ background: team.color }} />
         <span className="font-extrabold text-white uppercase tracking-wide text-sm">
           {team.name}
         </span>
       </div>
+
+      {/* Points won banner */}
+      {wonPoints !== null && (
+        <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-10 flex flex-col items-center gap-2 pointer-events-none">
+          <div className="text-white/70 font-extrabold uppercase tracking-widest text-lg"
+               style={{ textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
+            You scored
+          </div>
+          <div className="font-black text-white leading-none"
+               style={{
+                 fontSize: 'clamp(80px, 20vw, 200px)',
+                 textShadow: '0 0 40px rgba(255,220,0,0.9), 0 4px 0 rgba(0,0,0,0.5)',
+                 WebkitTextStroke: '3px rgba(0,0,0,0.3)',
+               }}>
+            {wonPoints.total}
+          </div>
+          <div className="text-white/70 font-extrabold uppercase tracking-widest text-lg"
+               style={{ textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
+            {wonPoints.total === 1 ? 'point' : 'points'}
+          </div>
+          {wonPoints.bonus > 0 && (
+            <div className="font-bold text-white/60 text-base uppercase tracking-widest"
+                 style={{ textShadow: '0 2px 8px rgba(0,0,0,0.8)' }}>
+              {wonPoints.slot} slot + {wonPoints.bonus} party bonus
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Return button */}
       <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">

@@ -76,11 +76,11 @@ describe('questions', () => {
     expect(useGameStore.getState().questions[0].text).toBe('Q2')
   })
 
-  it('updateQuestionSize clamps between 12 and 48', () => {
+  it('updateQuestionSize has no upper limit and clamps at 12 minimum', () => {
     useGameStore.getState().addQuestion('Q')
     const id = useGameStore.getState().questions[0].id
     useGameStore.getState().updateQuestionSize(id, 100)
-    expect(useGameStore.getState().questions[0].fontSize).toBe(48)
+    expect(useGameStore.getState().questions[0].fontSize).toBe(120)
     useGameStore.getState().updateQuestionSize(id, -200)
     expect(useGameStore.getState().questions[0].fontSize).toBe(12)
   })

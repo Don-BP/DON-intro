@@ -10,16 +10,43 @@ interface Props {
   team: Team
 }
 
+// Persists each team's rendered ball count across navigation (survives component unmount).
+const lastRenderedCounts = new Map<string, number>()
+
 export default function TeamBox({ team }: Props) {
   const router = useRouter()
   const containerRef = useRef<HTMLDivElement>(null)
   const colorDef = getTeamColor(team.color)
-  const prevBallCount = useRef(team.ballCount)
-  const { canvasRef, dropBalls } = useBallPhysics(containerRef, {
+
+  // How many balls were visible the last time this team box unmounted (0 = first visit).
+  const prevRendered = lastRenderedCounts.get(team.id) ?? 0
+  const prevBallCount = useRef(prevRendered)
+
+  // Always reflects the latest ballCount so the unmount cleanup captures it correctly.
+  const countRef = useRef(team.ballCount)
+  countRef.current = team.ballCount
+
+  const { canvasRef, dropBalls, placeBalls } = useBallPhysics(containerRef, {
     ballHex: colorDef.ballHex,
     ballSpec: colorDef.ballSpec,
   })
 
+  // On mount: restore already-seen balls at rest; drop only newly won ones from the top.
+  useEffect(() => {
+    const existing = prevRendered
+    const newBalls = team.ballCount - prevRendered
+    if (existing > 0) placeBalls(existing)
+    if (newBalls > 0) {
+      dropBalls(newBalls)
+      playBallDrop()
+    }
+    // Sync prevBallCount so the drop effect below sees diff = 0 on this same mount.
+    prevBallCount.current = team.ballCount
+  // placeBalls/dropBalls are stable callbacks; this intentionally runs once on mount.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [placeBalls])
+
+  // Drop balls added while this component is already mounted.
   useEffect(() => {
     const diff = team.ballCount - prevBallCount.current
     if (diff > 0) {
@@ -29,15 +56,12 @@ export default function TeamBox({ team }: Props) {
     prevBallCount.current = team.ballCount
   }, [team.ballCount, dropBalls])
 
+  // Save the rendered count so the next mount knows what's already been shown.
   useEffect(() => {
-    if (team.ballCount > 0) {
-      const perBatch = Math.min(team.ballCount, 50)
-      for (let i = 0; i < perBatch; i++) {
-        setTimeout(() => dropBalls(1), i * 80)
-      }
+    return () => {
+      lastRenderedCounts.set(team.id, countRef.current)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [team.id])
 
   const handlePlay = () => {
     playClick()
@@ -64,12 +88,15 @@ export default function TeamBox({ team }: Props) {
       {/* Team content */}
       <div className="relative z-10 flex flex-col items-center justify-between h-full p-4
                       text-white" style={{ textShadow: '0 2px 6px rgba(0,0,0,0.5)' }}>
-        <div className="font-extrabold uppercase tracking-widest text-sm opacity-90 mt-1">
-          {team.name}
-        </div>
 
-        <div className="font-black text-6xl leading-none drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)]">
-          {team.score}
+        {/* Top row: name left, score right */}
+        <div className="flex items-start justify-between w-full">
+          <div className="font-extrabold uppercase tracking-widest text-sm opacity-90">
+            {team.name}
+          </div>
+          <div className="font-black text-7xl leading-none drop-shadow-[0_4px_8px_rgba(0,0,0,0.4)]">
+            {team.score}
+          </div>
         </div>
 
         <button

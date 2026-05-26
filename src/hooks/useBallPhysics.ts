@@ -21,6 +21,7 @@ export function useBallPhysics(
   options: Options
 ) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const pendingTimeouts = useRef<ReturnType<typeof setTimeout>[]>([])
   const sceneRef = useRef<{
     renderer: THREE.WebGLRenderer
     scene: THREE.Scene
@@ -30,6 +31,7 @@ export function useBallPhysics(
     animId: number
     WORLD_W: number
     FLOOR_Y: number
+    DEPTH: number
     ballMaterial: CANNON.Material
     textureLoader: THREE.TextureLoader
     textures: THREE.Texture[]
@@ -53,9 +55,9 @@ export function useBallPhysics(
 
     const scene = new THREE.Scene()
     const aspect = W / H
-    const camera = new THREE.PerspectiveCamera(55, aspect, 0.1, 50)
-    camera.position.set(0, 1.0, 7)
-    camera.lookAt(0, -1.5, 0)
+    const camera = new THREE.PerspectiveCamera(55, aspect, 0.1, 80)
+    camera.position.set(0, 1.5, 12)
+    camera.lookAt(0, -2.0, 0)
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.55))
     const sun = new THREE.DirectionalLight(0xffffff, 0.9)
@@ -81,10 +83,11 @@ export function useBallPhysics(
     world.addContactMaterial(new CANNON.ContactMaterial(groundMat, ballMat, { friction: 0.55, restitution: 0.22 }))
     world.addContactMaterial(new CANNON.ContactMaterial(ballMat, ballMat, { friction: 0.4, restitution: 0.18 }))
 
-    const WORLD_W = 6
+    const WORLD_W = 10
     const WORLD_H = WORLD_W / aspect
     const FLOOR_Y = -(WORLD_H / 2) - 0.2
-    const WALL_T = 0.15
+    const WALL_T = 0.2
+    const DEPTH = 4.0
 
     function addStaticWall(x: number, y: number, z: number, hw: number, hh: number, hd: number) {
       const body = new CANNON.Body({ mass: 0, material: groundMat })
@@ -94,10 +97,11 @@ export function useBallPhysics(
     }
 
     const halfW = WORLD_W / 2 + WALL_T
-    addStaticWall(0, FLOOR_Y - WALL_T, 0, halfW, WALL_T, 2.5)
-    addStaticWall(-halfW - WALL_T, 0, 0, WALL_T, WORLD_H, 2.5)
-    addStaticWall(halfW + WALL_T, 0, 0, WALL_T, WORLD_H, 2.5)
-    addStaticWall(0, 0, -2.5 - WALL_T, halfW + WALL_T * 2, WORLD_H, WALL_T)
+    addStaticWall(0, FLOOR_Y - WALL_T, 0, halfW, WALL_T, DEPTH)              // floor
+    addStaticWall(-halfW - WALL_T, 0, 0, WALL_T, WORLD_H, DEPTH)             // left
+    addStaticWall(halfW + WALL_T, 0, 0, WALL_T, WORLD_H, DEPTH)              // right
+    addStaticWall(0, 0, -DEPTH - WALL_T, halfW + WALL_T * 2, WORLD_H, WALL_T) // back
+    addStaticWall(0, 0,  DEPTH + WALL_T, halfW + WALL_T * 2, WORLD_H, WALL_T) // front
 
     const textureLoader = new THREE.TextureLoader()
     const textures = MARBLE_PATHS.map(p => textureLoader.load(p))
@@ -120,7 +124,7 @@ export function useBallPhysics(
     }
     animate()
 
-    sceneRef.current = { renderer, scene, camera, world, bodies, animId, WORLD_W, FLOOR_Y, ballMaterial: ballMat, textureLoader, textures }
+    sceneRef.current = { renderer, scene, camera, world, bodies, animId, WORLD_W, FLOOR_Y, DEPTH, ballMaterial: ballMat, textureLoader, textures }
 
     const ro = new ResizeObserver(() => {
       const nW = container.clientWidth
@@ -133,20 +137,51 @@ export function useBallPhysics(
 
     return () => {
       cancelAnimationFrame(animId)
+      pendingTimeouts.current.forEach(clearTimeout)
+      pendingTimeouts.current = []
       ro.disconnect()
       renderer.dispose()
       sceneRef.current = null
     }
   }, [containerRef])
 
-  const dropBalls = useCallback((count: number) => {
-    const s = sceneRef.current
-    if (!s) return
+  function spawnBall(
+    s: NonNullable<typeof sceneRef.current>,
+    x: number, y: number, z: number,
+    vx: number, vy: number, vz: number
+  ) {
+    const BR = 0.56
+    const { world, scene, bodies, ballMaterial, textures } = s
+    const body = new CANNON.Body({
+      mass: 1,
+      material: ballMaterial,
+      linearDamping: 0.02,
+      angularDamping: 0.12,
+      allowSleep: true,
+      sleepSpeedLimit: 0.25,
+    })
+    body.addShape(new CANNON.Sphere(BR))
+    body.position.set(x, y, z)
+    body.velocity.set(vx, vy, vz)
+    world.addBody(body)
 
-    const BR = 0.28
-    const { world, scene, bodies, WORLD_W, FLOOR_Y, ballMaterial, textures } = s
+    const tex = textures[Math.floor(Math.random() * textures.length)]
+    const geo = new THREE.SphereGeometry(BR, 24, 24)
+    const mat = new THREE.MeshPhongMaterial({
+      map: tex,
+      color: options.ballHex,
+      specular: options.ballSpec,
+      shininess: 160,
+    })
+    const mesh = new THREE.Mesh(geo, mat)
+    mesh.castShadow = true
+    scene.add(mesh)
+    bodies.push({ body, mesh })
+  }
 
-    while (bodies.length + count > 50) {
+  function evictOldest(s: NonNullable<typeof sceneRef.current>, needed: number) {
+    const { world, scene, bodies } = s
+    while (bodies.length + needed > 50) {
       const oldest = bodies.shift()
       if (oldest) {
         world.removeBody(oldest.body)
@@ -155,43 +190,46 @@ export function useBallPhysics(
         ;(oldest.mesh.material as THREE.Material).dispose()
       }
     }
+  }
 
+  const dropBalls = useCallback((count: number) => {
+    const s = sceneRef.current
+    if (!s) return
+    const BR = 0.56
+    const { WORLD_W, FLOOR_Y, DEPTH } = s
+    evictOldest(s, count)
     for (let i = 0; i < count; i++) {
-      setTimeout(() => {
+      const id = setTimeout(() => {
+        pendingTimeouts.current = pendingTimeouts.current.filter(t => t !== id)
         if (!sceneRef.current) return
         const halfW = WORLD_W / 2 - BR * 1.5
         const rx = (Math.random() * 2 - 1) * halfW
         const ry = FLOOR_Y + WORLD_W + BR + Math.random() * 0.5
-        const rz = (Math.random() * 2 - 1) * 1.2
-
-        const body = new CANNON.Body({
-          mass: 1,
-          material: ballMaterial,
-          linearDamping: 0.02,
-          angularDamping: 0.12,
-          allowSleep: true,
-          sleepSpeedLimit: 0.25,
-        })
-        body.addShape(new CANNON.Sphere(BR))
-        body.position.set(rx, ry, rz)
-        body.velocity.set((Math.random() - 0.5) * 0.5, 0, (Math.random() - 0.5) * 0.3)
-        world.addBody(body)
-
-        const tex = textures[Math.floor(Math.random() * textures.length)]
-        const geo = new THREE.SphereGeometry(BR, 24, 24)
-        const mat = new THREE.MeshPhongMaterial({
-          map: tex,
-          color: options.ballHex,
-          specular: options.ballSpec,
-          shininess: 160,
-        })
-        const mesh = new THREE.Mesh(geo, mat)
-        mesh.castShadow = true
-        scene.add(mesh)
-        bodies.push({ body, mesh })
+        const rz = (Math.random() * 2 - 1) * (DEPTH - BR * 1.5)
+        spawnBall(sceneRef.current, rx, ry, rz, (Math.random() - 0.5) * 0.5, 0, (Math.random() - 0.5) * 0.3)
       }, i * 120)
+      pendingTimeouts.current.push(id)
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options.ballHex, options.ballSpec])
 
-  return { canvasRef, dropBalls }
+  // Place pre-existing balls near the floor without the drop animation.
+  const placeBalls = useCallback((count: number) => {
+    const s = sceneRef.current
+    if (!s || count === 0) return
+    const BR = 0.56
+    const { WORLD_W, FLOOR_Y, DEPTH } = s
+    evictOldest(s, count)
+    for (let i = 0; i < count; i++) {
+      const halfW = WORLD_W / 2 - BR * 1.5
+      const rx = (Math.random() * 2 - 1) * halfW
+      const row = Math.floor(i / 5)
+      const ry = FLOOR_Y + BR * 1.2 + row * BR * 2.2
+      const rz = (Math.random() * 2 - 1) * (DEPTH - BR * 1.5)
+      spawnBall(s, rx, ry, rz, 0, 0, 0)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options.ballHex, options.ballSpec])
+
+  return { canvasRef, dropBalls, placeBalls }
 }
