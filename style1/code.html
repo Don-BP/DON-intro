@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Arcade World - Shop</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#414a36",
+                        "tertiary-fixed": "#fed6ff",
+                        "secondary-fixed-dim": "#a4c9ff",
+                        "on-surface": "#181d12",
+                        "surface": "#f6fce9",
+                        "secondary-fixed": "#d4e3ff",
+                        "surface-bright": "#f6fce9",
+                        "tertiary-fixed-dim": "#f6adff",
+                        "on-primary": "#ffffff",
+                        "secondary-container": "#68abff",
+                        "inverse-on-surface": "#edf3e0",
+                        "primary-container": "#7ed321",
+                        "surface-variant": "#dfe5d2",
+                        "secondary": "#0060ac",
+                        "on-error-container": "#93000a",
+                        "outline": "#717a64",
+                        "outline-variant": "#c0cab1",
+                        "primary": "#3a6a00",
+                        "on-secondary-container": "#003e73",
+                        "on-secondary-fixed-variant": "#004883",
+                        "on-primary-container": "#2e5600",
+                        "on-background": "#181d12",
+                        "inverse-surface": "#2d3226",
+                        "primary-fixed": "#a1fa49",
+                        "tertiary": "#a000bf",
+                        "on-tertiary-container": "#83009d",
+                        "on-primary-fixed-variant": "#2a5000",
+                        "on-secondary": "#ffffff",
+                        "surface-container-highest": "#dfe5d2",
+                        "primary-fixed-dim": "#87dc2c",
+                        "on-secondary-fixed": "#001c39",
+                        "surface-tint": "#3a6a00",
+                        "on-tertiary-fixed": "#350040",
+                        "on-tertiary-fixed-variant": "#7a0092",
+                        "surface-container-high": "#e5ebd8",
+                        "background": "#f6fce9",
+                        "surface-container-low": "#f0f6e3",
+                        "on-primary-fixed": "#0e2000",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "on-tertiary": "#ffffff",
+                        "surface-container": "#ebf0dd",
+                        "error": "#ba1a1a",
+                        "inverse-primary": "#87dc2c",
+                        "on-error": "#ffffff",
+                        "tertiary-container": "#f39fff",
+                        "surface-dim": "#d7dcca"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "border-depth-md": "8px",
+                        "unit": "8px",
+                        "container-padding": "24px",
+                        "gutter": "16px",
+                        "border-depth-sm": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "label-bold": ["Plus Jakarta Sans"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "display-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["28px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "label-bold": ["14px", { "lineHeight": "1", "fontWeight": "800" }],
+                        "body-lg": ["18px", { "lineHeight": "1.5", "fontWeight": "600" }],
+                        "headline-lg-mobile": ["24px", { "lineHeight": "1.3", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "display-md": ["36px", { "lineHeight": "1.2", "fontWeight": "800" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Custom styles for the arcade aesthetic */
+        body {
+            background-color: #61B7F7; /* Using a vibrant blue background to match the prompt's image vibe */
+            background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 0%, transparent 100%);
+        }
+
+        .arcade-container {
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 50, 100, 0.2), inset 0 -8px 0px rgba(220, 230, 240, 1);
+            position: relative;
+        }
+
+        .arcade-ribbon {
+            background: linear-gradient(180deg, #FFB300 0%, #FF8F00 100%);
+            border-radius: 12px;
+            box-shadow: inset 0 4px 10px rgba(255, 255, 255, 0.4), 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+            margin-top: -20px;
+        }
+
+        .arcade-ribbon::before,
+        .arcade-ribbon::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 20px;
+            height: 30px;
+            background: #FF6F00;
+            z-index: -1;
+            border-radius: 4px;
+        }
+
+        .arcade-ribbon::before {
+            left: -10px;
+            transform: translateY(-50%) skewY(15deg);
+        }
+
+        .arcade-ribbon::after {
+            right: -10px;
+            transform: translateY(-50%) skewY(-15deg);
+        }
+
+        .arcade-item {
+            background: #FFF8E1; /* Light yellow tint */
+            border-radius: 16px;
+            box-shadow: inset 0 -4px 0px rgba(255, 224, 130, 1);
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .arcade-item:hover {
+            transform: translateY(-2px);
+            box-shadow: inset 0 -4px 0px rgba(255, 224, 130, 1), 0 6px 12px rgba(0,0,0,0.05);
+        }
+
+        .arcade-button-green {
+            background: linear-gradient(180deg, #64DD17 0%, #33691E 100%);
+            border-radius: 999px;
+            box-shadow: inset 0 6px 8px rgba(255, 255, 255, 0.5), 0 4px 0px #1B5E20, 0 8px 12px rgba(0,0,0,0.2);
+            border: 2px solid #F1F8E9;
+            transition: all 0.1s ease;
+        }
+
+        .arcade-button-green:active {
+            transform: translateY(4px);
+            box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.3), 0 0px 0px #1B5E20, 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .icon-box-energy { background: #FF80AB; border-radius: 12px 0 0 12px; }
+        .icon-box-heart { background: #64B5F6; border-radius: 12px 0 0 12px; }
+        .icon-box-coin { background: #B388FF; border-radius: 12px 0 0 12px; }
+
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 48;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-body-lg text-on-surface pb-24 md:pb-0">
+<!-- Top Navigation (Web) / Top App Bar (Mobile) -->
+<header class="flex justify-between items-center w-full sticky top-0 z-50 bg-surface shadow-md border-b-border-depth-md border-surface-variant w-full pt-4 pb-2 px-container-padding">
+<div class="font-display-md text-display-md text-primary drop-shadow-[0_2px_0_rgba(0,0,0,0.2)]">ARCADE WORLD</div>
+<div class="flex gap-4">
+<button class="hover:scale-105 transition-transform active:translate-y-border-depth-sm transition-all text-on-surface-variant flex items-center justify-center p-2 rounded-full bg-surface-variant shadow-[inset_0_-2px_0_rgba(0,0,0,0.1)]">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</button>
+<button class="hover:scale-105 transition-transform active:translate-y-border-depth-sm transition-all text-on-surface-variant flex items-center justify-center p-2 rounded-full bg-surface-variant shadow-[inset_0_-2px_0_rgba(0,0,0,0.1)]">
+<span class="material-symbols-outlined">stars</span>
+</button>
+<button class="hover:scale-105 transition-transform active:translate-y-border-depth-sm transition-all text-on-surface-variant flex items-center justify-center rounded-full bg-surface-variant shadow-[inset_0_-2px_0_rgba(0,0,0,0.1)] overflow-hidden w-10 h-10">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="A brightly lit, high-quality photograph of a friendly person used as a circular profile avatar in a digital interface. The lighting is soft and flattering, creating a welcoming and accessible mood consistent with a playful, light-mode application aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfeFCeeNSJZVB_q_CkjwPbo-ebJgydrAwZpU5HhLbeEOduecuOMPMQtjLpZk6TEu8LkWzbYA7wOuX6Jgm0rIXN9Uaq2sqd42nZxBLYIVZ7S_v7w_qqvbnt0lwZWR0g5mah-5AkUlM2_Elbq2FofmyPtP77TXcCCYAjTk4EJG0zQ-Xj8_AKaimfQYN2T1Yy_MwsF0QrygT__In8zPd6RtDtO_dJjQb8l6wVdcz5vW-Eoa-wj4vxFn_CMio8d-42TvT8aPUmn4nvZaOY"/>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex items-center justify-center p-gutter md:p-8">
+<div class="w-full max-w-[500px] arcade-container pb-8 pt-6 px-6 mt-8 mx-auto">
+<!-- Header Ribbon -->
+<div class="arcade-ribbon w-[110%] -ml-[5%] h-[60px] flex items-center justify-center mb-8">
+<h1 class="font-headline-lg text-headline-lg text-white drop-shadow-[0_2px_2px_rgba(0,0,0,0.3)]">Shop</h1>
+</div>
+<!-- Shop Items List -->
+<div class="flex flex-col gap-4">
+<!-- Item 1: Energy -->
+<div class="arcade-item flex items-stretch h-[80px]">
+<div class="icon-box-energy w-[80px] flex items-center justify-center shadow-[inset_-2px_0_0_rgba(0,0,0,0.05)]">
+<span class="material-symbols-outlined text-4xl text-[#2196F3] drop-shadow-[0_2px_0_rgba(255,255,255,0.5)]">bolt</span>
+</div>
+<div class="flex-grow flex items-center justify-between px-4">
+<div class="font-label-bold text-label-bold text-on-surface flex items-center gap-2">
+<span class="text-sm opacity-60">x</span> <span class="text-xl">200</span>
+</div>
+<button class="arcade-button-green px-6 py-2">
+<span class="font-label-bold text-label-bold text-white drop-shadow-[0_2px_1px_rgba(0,0,0,0.3)] uppercase">Buy 1,99$</span>
+</button>
+</div>
+</div>
+<!-- Item 2: Hearts -->
+<div class="arcade-item flex items-stretch h-[80px]">
+<div class="icon-box-heart w-[80px] flex items-center justify-center shadow-[inset_-2px_0_0_rgba(0,0,0,0.05)]">
+<span class="material-symbols-outlined text-4xl text-[#F44336] drop-shadow-[0_2px_0_rgba(255,255,255,0.5)]">favorite</span>
+</div>
+<div class="flex-grow flex items-center justify-between px-4">
+<div class="font-label-bold text-label-bold text-on-surface flex items-center gap-2">
+<span class="text-sm opacity-60">x</span> <span class="text-xl">2</span>
+</div>
+<button class="arcade-button-green px-6 py-2">
+<span class="font-label-bold text-label-bold text-white drop-shadow-[0_2px_1px_rgba(0,0,0,0.3)] uppercase">Buy 1,99$</span>
+</button>
+</div>
+</div>
+<!-- Item 3: Coins -->
+<div class="arcade-item flex items-stretch h-[80px]">
+<div class="icon-box-coin w-[80px] flex items-center justify-center shadow-[inset_-2px_0_0_rgba(0,0,0,0.05)]">
+<div class="w-10 h-10 rounded-full bg-[#FFD54F] border-4 border-[#FFA000] flex items-center justify-center shadow-[inset_0_2px_0_rgba(255,255,255,0.8)]">
+<span class="font-bold text-[#FFA000] text-lg">S</span>
+</div>
+</div>
+<div class="flex-grow flex items-center justify-between px-4">
+<div class="font-label-bold text-label-bold text-on-surface flex items-center gap-2">
+<span class="text-sm opacity-60">x</span> <span class="text-xl">1 200</span>
+</div>
+<button class="arcade-button-green px-6 py-2">
+<span class="font-label-bold text-label-bold text-white drop-shadow-[0_2px_1px_rgba(0,0,0,0.3)] uppercase">Buy 1,99$</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Shell (Mobile) -->
+<nav class="fixed bottom-0 w-full z-50 flex justify-around items-center h-20 px-4 bg-surface-container pb-safe md:hidden shadow-[0_-4px_20px_rgba(0,0,0,0.1)] rounded-t-lg">
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-variant transition-colors active:translate-y-1 duration-75 rounded-lg w-16">
+<span class="material-symbols-outlined mb-1">home</span>
+<span class="font-label-bold text-[10px]">Home</span>
+</button>
+<button class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-lg px-4 py-2 border-b-border-depth-sm border-primary active:translate-y-1 duration-75 w-20">
+<span class="material-symbols-outlined mb-1">shopping_bag</span>
+<span class="font-label-bold text-[10px]">Shop</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-variant transition-colors active:translate-y-1 duration-75 rounded-lg w-16">
+<span class="material-symbols-outlined mb-1">group</span>
+<span class="font-label-bold text-[10px]">Social</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-surface-variant p-2 hover:bg-surface-variant transition-colors active:translate-y-1 duration-75 rounded-lg w-16">
+<span class="material-symbols-outlined mb-1">settings</span>
+<span class="font-label-bold text-[10px]">Settings</span>
+</button>
+</nav>
+<!-- Desktop Side Navigation Shell (Hidden on Mobile) -->
+<aside class="hidden md:flex flex-col fixed left-0 top-[72px] h-[calc(100vh-72px)] w-64 bg-surface-container shadow-[4px_0_20px_rgba(0,0,0,0.05)] border-r border-surface-variant z-40 p-4 pt-8 gap-4">
+<button class="flex items-center gap-4 text-on-surface-variant p-4 hover:bg-surface-variant transition-colors active:translate-y-1 duration-75 rounded-xl w-full text-left">
+<span class="material-symbols-outlined text-2xl">home</span>
+<span class="font-body-lg text-body-lg">Home</span>
+</button>
+<button class="flex items-center gap-4 bg-primary-container text-on-primary-container p-4 border-b-border-depth-sm border-primary active:translate-y-1 duration-75 rounded-xl w-full text-left shadow-sm">
+<span class="material-symbols-outlined text-2xl">shopping_bag</span>
+<span class="font-body-lg text-body-lg font-bold">Shop</span>
+</button>
+<button class="flex items-center gap-4 text-on-surface-variant p-4 hover:bg-surface-variant transition-colors active:translate-y-1 duration-75 rounded-xl w-full text-left">
+<span class="material-symbols-outlined text-2xl">group</span>
+<span class="font-body-lg text-body-lg">Social</span>
+</button>
+<button class="flex items-center gap-4 text-on-surface-variant p-4 hover:bg-surface-variant transition-colors active:translate-y-1 duration-75 rounded-xl w-full text-left mt-auto">
+<span class="material-symbols-outlined text-2xl">settings</span>
+<span class="font-body-lg text-body-lg">Settings</span>
+</button>
+</aside>
+</body></html>

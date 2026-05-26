@@ -1,0 +1,72 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CLI Tool Contract",
+  "description": "Standardized I/O contract for all CLI tools. Ensures consistent interface across all tool wrappers.",
+  "definitions": {
+    "request": {
+      "type": "object",
+      "required": ["action", "params"],
+      "properties": {
+        "action": {
+          "type": "string",
+          "description": "Action to perform (e.g., 'review-pr', 'analyze', 'fetch')",
+          "minLength": 1,
+          "maxLength": 64
+        },
+        "params": {
+          "type": "object",
+          "description": "Action-specific parameters",
+          "additionalProperties": true
+        },
+        "context": {
+          "type": "object",
+          "description": "Optional context (auth tokens, API keys, etc)",
+          "additionalProperties": true
+        }
+      }
+    },
+    "response": {
+      "type": "object",
+      "required": ["success", "data", "error"],
+      "properties": {
+        "success": {
+          "type": "boolean",
+          "description": "Whether the action succeeded"
+        },
+        "data": {
+          "description": "Action-specific return data (null if failed)",
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string" },
+            { "type": "number" },
+            { "type": "boolean" },
+            { "type": "array" },
+            { "type": "object" }
+          ]
+        },
+        "error": {
+          "oneOf": [
+            { "type": "null" },
+            { "type": "string" },
+            {
+              "type": "object",
+              "properties": {
+                "code": { "type": "string" },
+                "message": { "type": "string" },
+                "details": { "type": "object" }
+              }
+            }
+          ],
+          "description": "Error message or object (null if success)"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Optional metadata (execution time, version, etc)",
+          "additionalProperties": true
+        }
+      }
+    }
+  },
+  "request": { "$ref": "#/definitions/request" },
+  "response": { "$ref": "#/definitions/response" }
+}

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ball Physics Demo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { overflow: hidden; background: #0d1b2a; font-family: 'Plus Jakarta Sans', sans-serif; }
+  canvas { display: block; }
+
+  #overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none;
+  }
+
+  #title {
+    position: absolute; top: 16px; left: 50%; transform: translateX(-50%);
+    font-size: 13px; font-weight: 800; color: rgba(255,255,255,0.5);
+    text-transform: uppercase; letter-spacing: 2px;
+  }
+
+  .team-hud {
+    position: absolute;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    pointer-events: none;
+  }
+  .team-hud-name {
+    font-size: 11px; font-weight: 900; text-transform: uppercase;
+    letter-spacing: 1px; text-shadow: 0 2px 6px rgba(0,0,0,0.8);
+  }
+  .team-hud-count {
+    font-size: 22px; font-weight: 900; color: white;
+    text-shadow: 0 0 12px currentColor, 0 2px 4px rgba(0,0,0,0.8);
+    line-height: 1;
+  }
+  .team-hud-label {
+    font-size: 8px; font-weight: 700; color: rgba(255,255,255,0.5);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+
+  #controls {
+    position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 10px; pointer-events: all;
+    background: rgba(0,0,0,0.5); padding: 12px 16px; border-radius: 16px;
+    backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08);
+  }
+  .drop-btn {
+    padding: 10px 16px; border: none; border-radius: 10px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 11px; font-weight: 900; cursor: pointer; color: white;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.4);
+    transition: transform 0.08s, box-shadow 0.08s;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+  }
+  .drop-btn:hover { filter: brightness(1.1); }
+  .drop-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.4); }
+
+  #hint {
+    position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; color: rgba(255,255,255,0.35); font-weight: 700;
+    text-transform: uppercase; letter-spacing: 2px; pointer-events: none;
+    white-space: nowrap;
+  }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="overlay">
+  <div id="title">Ball Physics Demo — Team Board</div>
+  <div id="hint">Drop balls into each team's box — they pile up with real physics</div>
+  <div id="hud-container"></div>
+</div>
+<div id="controls">
+  <button class="drop-btn" style="background:linear-gradient(180deg,#66BB6A,#2E7D32);box-shadow:0 4px 0 #1B5E20;" onclick="dropBall(0)">▼ Team 1</button>
+  <button class="drop-btn" style="background:linear-gradient(180deg,#FFA726,#E65100);box-shadow:0 4px 0 #BF360C;" onclick="dropBall(1)">▼ Team 2</button>
+  <button class="drop-btn" style="background:linear-gradient(180deg,#42A5F5,#1565C0);box-shadow:0 4px 0 #0D47A1;" onclick="dropBall(2)">▼ Team 3</button>
+  <button class="drop-btn" style="background:linear-gradient(180deg,#EC407A,#AD1457);box-shadow:0 4px 0 #880E4F;" onclick="dropBall(3)">▼ Team 4</button>
+</div>
+
+<script>
+// ─── Renderer ─────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.2;
+
+// ─── Scene + Camera ───────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0d1b2a);
+scene.fog = new THREE.FogExp2(0x0d1b2a, 0.03);
+
+const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 100);
+camera.position.set(0, 9.5, 11);
+camera.lookAt(0, -1, 0);
+
+// ─── Lighting ─────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0x8899bb, 0.6));
+
+const sun = new THREE.DirectionalLight(0xffeedd, 1.2);
+sun.position.set(6, 12, 8);
+sun.castShadow = true;
+sun.shadow.mapSize.width = 2048;
+sun.shadow.mapSize.height = 2048;
+sun.shadow.camera.left = -12; sun.shadow.camera.right = 12;
+sun.shadow.camera.top = 12; sun.shadow.camera.bottom = -12;
+sun.shadow.bias = -0.001;
+scene.add(sun);
+
+scene.add(Object.assign(new THREE.DirectionalLight(0x4488ff, 0.4), { position: new THREE.Vector3(-8, 6, -6) }));
+
+// ─── Physics World ────────────────────────────────────────────
+const world = new CANNON.World();
+world.gravity.set(0, -28, 0);
+world.broadphase = new CANNON.NaiveBroadphase();
+world.solver.iterations = 20;
+world.allowSleep = true;
+
+const gMat = new CANNON.Material('ground');
+const bMat = new CANNON.Material('ball');
+world.addContactMaterial(new CANNON.ContactMaterial(gMat, bMat, { friction: 0.55, restitution: 0.22 }));
+world.addContactMaterial(new CANNON.ContactMaterial(bMat, bMat, { friction: 0.4,  restitution: 0.18 }));
+
+// ─── Team Config ──────────────────────────────────────────────
+const teams = [
+  { name: 'Team 1', wallHex: 0x388E3C, floorHex: 0x1B5E20, ballHex: 0x81C784, specHex: 0xC8E6C9, glowColor: '#66BB6A' },
+  { name: 'Team 2', wallHex: 0xF57C00, floorHex: 0xBF360C, ballHex: 0xFFB74D, specHex: 0xFFE0B2, glowColor: '#FFA726' },
+  { name: 'Team 3', wallHex: 0x1976D2, floorHex: 0x0D47A1, ballHex: 0x64B5F6, specHex: 0xBBDEFB, glowColor: '#42A5F5' },
+  { name: 'Team 4', wallHex: 0xC2185B, floorHex: 0x880E4F, ballHex: 0xF48FB1, specHex: 0xFCE4EC, glowColor: '#EC407A' },
+];
+
+// ─── Bin Geometry ─────────────────────────────────────────────
+const BW = 3.8,  BD = 3.4;  // bin width / depth
+const WT = 0.14;             // wall thickness
+const WH = 3.6;              // wall height
+const FY = -1.8;             // floor Y
+const GAP = 0.45;            // gap between bins
+
+const binCenters = [
+  { x: -(BW/2 + GAP/2), z:  (BD/2 + GAP/2) },  // front-left
+  { x:  (BW/2 + GAP/2), z:  (BD/2 + GAP/2) },  // front-right
+  { x: -(BW/2 + GAP/2), z: -(BD/2 + GAP/2) },  // back-left
+  { x:  (BW/2 + GAP/2), z: -(BD/2 + GAP/2) },  // back-right
+];
+
+const ballCounts = [0, 0, 0, 0];
+const syncPairs  = [];  // {body, mesh}
+
+function addStaticWall(cx, cy, cz, w, h, d) {
+  const b = new CANNON.Body({ mass: 0, material: gMat });
+  b.addShape(new CANNON.Box(new CANNON.Vec3(w/2, h/2, d/2)));
+  b.position.set(cx, cy, cz);
+  world.addBody(b);
+}
+
+function makeWallMesh(w, h, d, color, opacity) {
+  const m = new THREE.Mesh(
+    new THREE.BoxGeometry(w, h, d),
+    new THREE.MeshPhongMaterial({ color, transparent: true, opacity, shininess: 60, specular: 0x888888 })
+  );
+  m.receiveShadow = true;
+  scene.add(m);
+  return m;
+}
+function makeFloorMesh(w, d, color) {
+  const m = new THREE.Mesh(
+    new THREE.BoxGeometry(w, WT, d),
+    new THREE.MeshPhongMaterial({ color, shininess: 80, specular: 0x444444 })
+  );
+  m.receiveShadow = true;
+  scene.add(m);
+  return m;
+}
+
+binCenters.forEach(({ x, z }, i) => {
+  const t = teams[i];
+  const midY = FY + WH / 2;
+
+  // Physics
+  addStaticWall(x,             FY - WT/2,  z,           BW,       WT, BD);        // floor
+  addStaticWall(x - BW/2 - WT/2, midY,    z,           WT,       WH, BD + WT*2); // left
+  addStaticWall(x + BW/2 + WT/2, midY,    z,           WT,       WH, BD + WT*2); // right
+  addStaticWall(x,             midY,       z - BD/2 - WT/2, BW + WT*2, WH, WT);  // back
+  // no front wall — open toward camera
+
+  // Visuals
+  makeFloorMesh(BW, BD, t.floorHex).position.set(x, FY - WT/2, z);
+  makeWallMesh(WT, WH, BD + WT*2, t.wallHex, 0.55).position.set(x - BW/2 - WT/2, midY, z);
+  makeWallMesh(WT, WH, BD + WT*2, t.wallHex, 0.55).position.set(x + BW/2 + WT/2, midY, z);
+  makeWallMesh(BW + WT*2, WH, WT, t.wallHex, 0.55).position.set(x, midY, z - BD/2 - WT/2);
+
+  // Subtle point light inside each bin
+  const pl = new THREE.PointLight(t.wallHex, 0.5, 5);
+  pl.position.set(x, FY + 1, z);
+  scene.add(pl);
+});
+
+// ─── Ball Spawner ─────────────────────────────────────────────
+const BR = 0.2; // ball radius
+// Each team gets a slightly different ball look (color variation + stripe-like via emissive)
+const ballVariants = [
+  [0x81C784, 0xA5D6A7, 0x4CAF50],
+  [0xFFB74D, 0xFFCC80, 0xFF9800],
+  [0x64B5F6, 0x90CAF9, 0x2196F3],
+  [0xF48FB1, 0xF8BBD9, 0xE91E63],
+];
+
+function dropBall(ti) {
+  const { x, z } = binCenters[ti];
+  const rx = x + (Math.random() - 0.5) * BW * 0.55;
+  const rz = z + (Math.random() - 0.5) * BD * 0.55;
+  const ry = FY + WH + 0.8 + Math.random() * 0.4;
+
+  // Physics body
+  const body = new CANNON.Body({ mass: 1.0, material: bMat, linearDamping: 0.01, angularDamping: 0.1 });
+  body.addShape(new CANNON.Sphere(BR));
+  body.position.set(rx, ry, rz);
+  body.velocity.set((Math.random()-0.5)*0.5, 0, (Math.random()-0.5)*0.5);
+  body.allowSleep = true;
+  body.sleepSpeedLimit = 0.3;
+  world.addBody(body);
+
+  // Visual mesh — glossy marble look
+  const v = ballVariants[ti];
+  const idx = Math.floor(Math.random() * 3);
+  const mesh = new THREE.Mesh(
+    new THREE.SphereGeometry(BR, 28, 28),
+    new THREE.MeshPhongMaterial({
+      color: v[idx % 3],
+      specular: 0xffffff,
+      shininess: 180,
+      emissive: teams[ti].wallHex,
+      emissiveIntensity: 0.06,
+    })
+  );
+  mesh.castShadow = true;
+  scene.add(mesh);
+  syncPairs.push({ body, mesh });
+
+  ballCounts[ti]++;
+  updateHUD();
+}
+
+// ─── HUD Labels (projected) ───────────────────────────────────
+const hudContainer = document.getElementById('hud-container');
+const hudEls = teams.map((t, i) => {
+  const div = document.createElement('div');
+  div.className = 'team-hud';
+  div.innerHTML = `
+    <div class="team-hud-name" style="color:${t.glowColor}">${t.name}</div>
+    <div class="team-hud-count" style="color:${t.glowColor};text-shadow:0 0 14px ${t.glowColor}">0</div>
+    <div class="team-hud-label">balls</div>
+  `;
+  hudContainer.appendChild(div);
+  return div;
+});
+
+function updateHUD() {
+  teams.forEach((t, i) => {
+    hudEls[i].querySelector('.team-hud-count').textContent = ballCounts[i];
+  });
+}
+
+function projectToScreen(x, y, z) {
+  const v = new THREE.Vector3(x, y, z);
+  v.project(camera);
+  return {
+    left: (v.x * 0.5 + 0.5) * window.innerWidth,
+    top:  (-v.y * 0.5 + 0.5) * window.innerHeight,
+  };
+}
+
+function positionHUDs() {
+  binCenters.forEach(({ x, z }, i) => {
+    const { left, top } = projectToScreen(x, FY + WH + 0.5, z);
+    hudEls[i].style.left = left + 'px';
+    hudEls[i].style.top  = top  + 'px';
+    hudEls[i].style.transform = 'translate(-50%, -50%)';
+  });
+}
+
+// ─── Animation Loop ───────────────────────────────────────────
+const clock = new THREE.Clock();
+let acc = 0;
+const STEP = 1 / 60;
+
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = Math.min(clock.getDelta(), 0.04);
+  acc += dt;
+  while (acc >= STEP) { world.step(STEP); acc -= STEP; }
+  for (const { body, mesh } of syncPairs) {
+    mesh.position.copy(body.position);
+    mesh.quaternion.copy(body.quaternion);
+  }
+  positionHUDs();
+  renderer.render(scene, camera);
+}
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Seed a few starter balls so it's not empty
+[0,1,2,3].forEach(ti => {
+  for (let j = 0; j < 3; j++) {
+    setTimeout(() => dropBall(ti), ti * 120 + j * 60);
+  }
+});
+
+animate();
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f6fce9; }
+  h2 { color: #1a1a1a; }
+  .subtitle { color: #555; margin-bottom: 24px; }
+
+  .layouts { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 8px; }
+
+  .layout-card {
+    background: #fff; border-radius: 16px; padding: 16px;
+    border: 3px solid transparent; cursor: pointer; transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  }
+  .layout-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+  .layout-card.selected { border-color: #3a6a00; background: #f0f6e3; }
+
+  .option-letter { font-size: 11px; font-weight: 900; color: #3a6a00; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+  .layout-label { font-size: 13px; font-weight: 800; color: #3a6a00; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .layout-desc { font-size: 12px; color: #666; margin-top: 10px; font-weight: 600; line-height: 1.4; }
+
+  /* ─── Shared mini UI components ─── */
+  .mini-screen {
+    background: #61B7F7;
+    border-radius: 12px;
+    padding: 10px;
+    min-height: 200px;
+    position: relative;
+    overflow: hidden;
+  }
+  .mini-header {
+    background: #fff;
+    border-radius: 8px 8px 0 0;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: -10px -10px 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  }
+  .mini-header-title { font-size: 11px; font-weight: 900; color: #3a6a00; flex: 1; text-transform: uppercase; letter-spacing: 0.5px; }
+  .mini-back { font-size: 9px; background: #f0f6e3; border-radius: 6px; padding: 3px 7px; font-weight: 800; color: #3a6a00; }
+
+  /* ─── Option A: Flashcard style ─── */
+  .add-input-a {
+    background: white; border-radius: 8px; padding: 6px 8px;
+    display: flex; align-items: center; gap: 5px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1); margin-bottom: 8px;
+  }
+  .add-input-a input-mock { flex: 1; font-size: 9px; color: #888; font-family: inherit; font-weight: 600; }
+  .add-btn { background: linear-gradient(180deg,#64DD17,#33691E); color: white; border-radius: 6px; padding: 3px 8px; font-size: 9px; font-weight: 900; box-shadow: 0 2px 0 #1B5E20; }
+
+  .flashcard {
+    background: white;
+    border-radius: 10px;
+    padding: 8px 10px;
+    margin-bottom: 6px;
+    box-shadow: 0 3px 0 #c0cab1;
+    border: 2px solid #dfe5d2;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .flashcard-num { font-size: 9px; font-weight: 900; color: #3a6a00; background: #f0f6e3; border-radius: 4px; padding: 2px 5px; flex-shrink: 0; }
+  .flashcard-text { font-size: 11px; font-weight: 700; color: #181d12; flex: 1; line-height: 1.3; }
+  .flashcard-text.big { font-size: 13px; }
+  .flashcard-text.small { font-size: 9px; }
+  .size-controls { display: flex; flex-direction: column; gap: 2px; }
+  .sz-btn { width: 14px; height: 14px; border-radius: 4px; background: #e5ebd8; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 900; color: #414a36; }
+
+  /* ─── Option B: Spotlight style ─── */
+  .ribbon-b {
+    background: linear-gradient(180deg, #FFB300 0%, #FF8F00 100%);
+    border-radius: 8px; padding: 5px 12px; margin-bottom: 8px; text-align: center;
+    box-shadow: inset 0 3px 6px rgba(255,255,255,0.4), 0 3px 0 #E65100;
+    font-size: 11px; font-weight: 900; color: white; text-transform: uppercase; letter-spacing: 1px;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  }
+  .spotlight-question {
+    background: white; border-radius: 10px; padding: 10px 12px; margin-bottom: 6px;
+    display: flex; align-items: flex-start; gap: 6px;
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,0.08);
+  }
+  .q-emoji { font-size: 14px; }
+  .q-content { flex: 1; }
+  .q-text { font-size: 12px; font-weight: 700; color: #181d12; line-height: 1.3; }
+  .q-text.xl { font-size: 16px; }
+  .q-text.sm { font-size: 9px; }
+  .q-meta { font-size: 8px; color: #888; font-weight: 600; margin-top: 2px; }
+  .size-row { display: flex; gap: 3px; margin-top: 3px; }
+  .sz-pill { font-size: 8px; font-weight: 900; background: #f0f6e3; color: #3a6a00; border-radius: 4px; padding: 1px 5px; }
+
+  .add-row-b {
+    display: flex; gap: 5px;
+  }
+  .add-box-b {
+    flex: 1; background: white; border-radius: 8px; padding: 6px 8px;
+    font-size: 9px; color: #aaa; font-weight: 600;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,0.08);
+  }
+</style>
+
+<h2>Questions Page Design</h2>
+<p class="subtitle">How should the question list look and feel?</p>
+
+<div class="layouts">
+
+  <!-- Option A: Flashcard list -->
+  <div class="layout-card" data-choice="flashcard" onclick="toggleSelect(this)">
+    <div class="option-letter">Option A</div>
+    <div class="layout-label">Flashcards</div>
+    <div class="mini-screen">
+      <div class="mini-header">
+        <span class="mini-back">← Back</span>
+        <span class="mini-header-title">❓ Questions</span>
+      </div>
+      <!-- Add input -->
+      <div class="add-input-a">
+        <span style="font-size:9px;color:#aaa;font-weight:600;flex:1;">Type a question…</span>
+        <div class="add-btn">+ Add</div>
+      </div>
+      <!-- Question cards -->
+      <div class="flashcard">
+        <div class="flashcard-num">1</div>
+        <div class="flashcard-text big">What's your hidden talent?</div>
+        <div class="size-controls">
+          <div class="sz-btn">+</div>
+          <div class="sz-btn">−</div>
+        </div>
+      </div>
+      <div class="flashcard">
+        <div class="flashcard-num">2</div>
+        <div class="flashcard-text">If you were an animal, what would you be?</div>
+        <div class="size-controls">
+          <div class="sz-btn">+</div>
+          <div class="sz-btn">−</div>
+        </div>
+      </div>
+      <div class="flashcard">
+        <div class="flashcard-num">3</div>
+        <div class="flashcard-text small">What's one thing most people don't know about you?</div>
+        <div class="size-controls">
+          <div class="sz-btn">+</div>
+          <div class="sz-btn">−</div>
+        </div>
+      </div>
+    </div>
+    <p class="layout-desc">Clean numbered cards. + / − controls on each card adjust that question's font size individually.</p>
+  </div>
+
+  <!-- Option B: Spotlight / Ribbon style -->
+  <div class="layout-card" data-choice="spotlight" onclick="toggleSelect(this)">
+    <div class="option-letter">Option B</div>
+    <div class="layout-label">Spotlight</div>
+    <div class="mini-screen" style="background:#3a6a00;">
+      <div class="mini-header">
+        <span class="mini-back">← Back</span>
+        <span class="mini-header-title">❓ Questions</span>
+      </div>
+      <div class="ribbon-b">Question Bank</div>
+      <!-- Questions -->
+      <div class="spotlight-question">
+        <div class="q-emoji">🌟</div>
+        <div class="q-content">
+          <div class="q-text xl">What's your hidden talent?</div>
+          <div class="size-row">
+            <div class="sz-pill">A+</div>
+            <div class="sz-pill">A−</div>
+          </div>
+        </div>
+      </div>
+      <div class="spotlight-question">
+        <div class="q-emoji">🐾</div>
+        <div class="q-content">
+          <div class="q-text">If you were an animal, what would you be?</div>
+          <div class="size-row">
+            <div class="sz-pill">A+</div>
+            <div class="sz-pill">A−</div>
+          </div>
+        </div>
+      </div>
+      <div class="spotlight-question" style="margin-bottom:5px;">
+        <div class="q-emoji">🤫</div>
+        <div class="q-content">
+          <div class="q-text sm">What's one thing most people don't know about you?</div>
+          <div class="size-row">
+            <div class="sz-pill">A+</div>
+            <div class="sz-pill">A−</div>
+          </div>
+        </div>
+      </div>
+      <div class="add-row-b">
+        <div class="add-box-b">Type a new question…</div>
+        <div class="add-btn">+</div>
+      </div>
+    </div>
+    <p class="layout-desc">Dark arcade backdrop with white cards, random fun emoji per question, arcade ribbon header. Bolder, more theatrical.</p>
+  </div>
+
+</div>

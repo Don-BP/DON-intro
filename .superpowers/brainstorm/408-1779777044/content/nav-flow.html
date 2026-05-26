@@ -1,0 +1,266 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Plus Jakarta Sans', sans-serif; background: #f6fce9; }
+  h2 { color: #1a1a1a; }
+  .subtitle { color: #555; margin-bottom: 28px; }
+
+  .flow {
+    display: flex;
+    align-items: flex-start;
+    gap: 0;
+    overflow-x: auto;
+    padding: 8px 0 20px;
+  }
+
+  .screen-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .screen-box {
+    background: white;
+    border-radius: 14px;
+    padding: 14px 12px 10px;
+    width: 120px;
+    border: 3px solid #dfe5d2;
+    box-shadow: 0 4px 0 #c0cab1;
+    position: relative;
+    text-align: center;
+  }
+
+  .screen-box.primary { border-color: #3a6a00; box-shadow: 0 4px 0 #1B5E20; }
+  .screen-box.secondary { border-color: #FFB300; box-shadow: 0 4px 0 #E65100; }
+  .screen-box.tertiary { border-color: #42A5F5; box-shadow: 0 4px 0 #1565C0; }
+  .screen-box.quaternary { border-color: #9C27B0; box-shadow: 0 4px 0 #6A1B9A; }
+
+  .screen-icon { font-size: 28px; margin-bottom: 6px; }
+  .screen-title { font-size: 11px; font-weight: 900; color: #1a1a1a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+  .screen-route { font-size: 9px; font-weight: 700; color: #888; font-family: monospace; margin-bottom: 8px; }
+
+  .screen-features { text-align: left; }
+  .feature-item {
+    font-size: 9px; font-weight: 600; color: #414a36;
+    display: flex; align-items: flex-start; gap: 4px; margin-bottom: 3px; line-height: 1.3;
+  }
+  .feature-dot { width: 4px; height: 4px; border-radius: 50%; background: #3a6a00; flex-shrink: 0; margin-top: 3px; }
+  .feature-dot.orange { background: #FF8F00; }
+  .feature-dot.blue { background: #1565C0; }
+  .feature-dot.purple { background: #6A1B9A; }
+
+  /* Arrows */
+  .arrow-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    gap: 4px;
+    margin-top: 40px;
+  }
+
+  .arrow-line {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .arrow-label {
+    font-size: 8px;
+    font-weight: 700;
+    color: #888;
+    white-space: nowrap;
+    text-align: center;
+    max-width: 60px;
+    line-height: 1.2;
+  }
+
+  .arrow-svg { color: #c0cab1; }
+
+  /* Side branches */
+  .side-branches {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-left: 0;
+    flex-shrink: 0;
+  }
+
+  .branch-row {
+    display: flex;
+    align-items: center;
+    gap: 0;
+  }
+
+  .branch-arrow {
+    display: flex;
+    align-items: center;
+    padding: 0 4px;
+    margin-top: 28px;
+  }
+
+  .screen-box-sm {
+    background: white;
+    border-radius: 12px;
+    padding: 10px 10px 8px;
+    width: 110px;
+    text-align: center;
+    border: 3px solid #dfe5d2;
+    box-shadow: 0 3px 0 #c0cab1;
+  }
+  .screen-box-sm.tertiary { border-color: #42A5F5; box-shadow: 0 3px 0 #1565C0; }
+  .screen-box-sm.quaternary { border-color: #9C27B0; box-shadow: 0 3px 0 #6A1B9A; }
+
+  .badge {
+    display: inline-block;
+    font-size: 8px;
+    font-weight: 800;
+    padding: 2px 6px;
+    border-radius: 999px;
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .badge-green { background: #e8f5e9; color: #2e7d32; }
+  .badge-orange { background: #fff3e0; color: #e65100; }
+  .badge-blue { background: #e3f2fd; color: #1565c0; }
+  .badge-purple { background: #f3e5f5; color: #6a1b9a; }
+
+  .tech-note {
+    background: #fff;
+    border-radius: 10px;
+    padding: 10px 14px;
+    border: 2px solid #dfe5d2;
+    margin-top: 20px;
+  }
+  .tech-title { font-size: 11px; font-weight: 900; color: #3a6a00; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .tech-row { display: flex; flex-wrap: wrap; gap: 6px; }
+  .tech-pill {
+    font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 6px;
+    background: #f0f6e3; color: #2e5600; border: 1px solid #c0cab1;
+  }
+</style>
+
+<h2>App Screen Flow</h2>
+<p class="subtitle">How all the screens connect — click to confirm this looks right</p>
+
+<div class="flow">
+
+  <!-- BOARD (main) -->
+  <div class="screen-node">
+    <div class="screen-box primary">
+      <div class="badge badge-green">Home</div>
+      <div class="screen-icon">🎮</div>
+      <div class="screen-title">Team Board</div>
+      <div class="screen-route">/</div>
+      <div class="screen-features">
+        <div class="feature-item"><div class="feature-dot"></div>Grid of team boxes (4/6/8)</div>
+        <div class="feature-item"><div class="feature-dot"></div>3D marble balls pile up per team</div>
+        <div class="feature-item"><div class="feature-dot"></div>▶ Play button per team</div>
+        <div class="feature-item"><div class="feature-dot"></div>❓ Question button (GIF)</div>
+        <div class="feature-item"><div class="feature-dot"></div>🔊 Volume / mute</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Arrow: Board → Plinko -->
+  <div class="arrow-group">
+    <div class="arrow-line">
+      <svg width="28" height="16" viewBox="0 0 28 16" class="arrow-svg">
+        <line x1="0" y1="8" x2="20" y2="8" stroke="#c0cab1" stroke-width="2"/>
+        <polygon points="20,4 28,8 20,12" fill="#c0cab1"/>
+      </svg>
+    </div>
+    <div class="arrow-label">▶ Play button</div>
+    <div style="height:6px;"></div>
+    <div class="arrow-line" style="transform:scaleX(-1)">
+      <svg width="28" height="16" viewBox="0 0 28 16" class="arrow-svg">
+        <line x1="0" y1="8" x2="20" y2="8" stroke="#FFB300" stroke-width="2" stroke-dasharray="4,2"/>
+        <polygon points="20,4 28,8 20,12" fill="#FFB300"/>
+      </svg>
+    </div>
+    <div class="arrow-label" style="color:#FF8F00;">↩ Return to Board</div>
+  </div>
+
+  <!-- PLINKO -->
+  <div class="screen-node">
+    <div class="screen-box secondary">
+      <div class="badge badge-orange">Game</div>
+      <div class="screen-icon">🎳</div>
+      <div class="screen-title">Plinko</div>
+      <div class="screen-route">/plinko/[teamId]</div>
+      <div class="screen-features">
+        <div class="feature-item"><div class="feature-dot orange"></div>Fullscreen iframe</div>
+        <div class="feature-item"><div class="feature-dot orange"></div>3d_plinko_extreme.html</div>
+        <div class="feature-item"><div class="feature-dot orange"></div>Tap → drop 1 ball</div>
+        <div class="feature-item"><div class="feature-dot orange"></div>postMessage score → Next.js</div>
+        <div class="feature-item"><div class="feature-dot orange"></div>"Return to Board" overlay btn</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spacer + side branches -->
+  <div style="display:flex;flex-direction:column;gap:0;margin-left:0;">
+
+    <!-- Arrow Board → Questions (diagonal) -->
+    <div class="branch-row" style="align-items:flex-start;">
+      <div class="branch-arrow" style="margin-top:0;flex-direction:column;gap:3px;padding:8px 4px;">
+        <div style="font-size:8px;font-weight:700;color:#1565C0;white-space:nowrap;">❓ Question button</div>
+        <svg width="16" height="24" viewBox="0 0 16 24">
+          <line x1="8" y1="0" x2="8" y2="16" stroke="#42A5F5" stroke-width="2"/>
+          <polygon points="4,16 8,24 12,16" fill="#42A5F5"/>
+        </svg>
+      </div>
+      <div class="screen-box-sm tertiary" style="margin-top:0;">
+        <div class="badge badge-blue">Page</div>
+        <div class="screen-icon" style="font-size:22px;">❓</div>
+        <div class="screen-title" style="font-size:10px;">Questions</div>
+        <div class="screen-route">/questions</div>
+        <div class="screen-features">
+          <div class="feature-item"><div class="feature-dot blue"></div>Add questions</div>
+          <div class="feature-item"><div class="feature-dot blue"></div>+ / − font size</div>
+          <div class="feature-item"><div class="feature-dot blue"></div>Auto-save localStorage</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="height: 16px;"></div>
+
+    <!-- Arrow Board → Settings -->
+    <div class="branch-row">
+      <div class="branch-arrow" style="margin-top:0;flex-direction:column;gap:3px;padding:8px 4px;">
+        <div style="font-size:8px;font-weight:700;color:#6A1B9A;white-space:nowrap;">⚙️ Settings icon</div>
+        <svg width="16" height="24" viewBox="0 0 16 24">
+          <line x1="8" y1="0" x2="8" y2="16" stroke="#9C27B0" stroke-width="2"/>
+          <polygon points="4,16 8,24 12,16" fill="#9C27B0"/>
+        </svg>
+      </div>
+      <div class="screen-box-sm quaternary">
+        <div class="badge badge-purple">Admin</div>
+        <div class="screen-icon" style="font-size:22px;">⚙️</div>
+        <div class="screen-title" style="font-size:10px;">Settings</div>
+        <div class="screen-route">/settings</div>
+        <div class="screen-features">
+          <div class="feature-item"><div class="feature-dot purple"></div>Team count (4/6/8)</div>
+          <div class="feature-item"><div class="feature-dot purple"></div>Team names + colors</div>
+          <div class="feature-item"><div class="feature-dot purple"></div>Reset scores</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="tech-note">
+  <div class="tech-title">Tech Stack</div>
+  <div class="tech-row">
+    <div class="tech-pill">Next.js 14 (App Router)</div>
+    <div class="tech-pill">Tailwind CSS</div>
+    <div class="tech-pill">Three.js + Cannon.js (board balls)</div>
+    <div class="tech-pill">Howler.js (sound)</div>
+    <div class="tech-pill">Zustand (state)</div>
+    <div class="tech-pill">localStorage (persistence)</div>
+    <div class="tech-pill">postMessage bridge (plinko score)</div>
+  </div>
+</div>

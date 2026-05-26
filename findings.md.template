@@ -1,0 +1,63 @@
+# Findings & Discoveries
+
+**Project:** [Your Project Name]
+**Created:** [Date]
+**Last Updated:** [Date]
+
+## 🔍 Research Discoveries
+
+### External Services & APIs
+- **[Service Name]**: [Key findings]
+  - Rate limits: [?]
+  - Auth method: [?]
+  - Pricing: [?]
+  - Availability: [?]
+
+### Data Sources
+- **[Source Name]**: [Key findings]
+  - Format: [?]
+  - Update frequency: [?]
+  - Access method: [?]
+
+### Technical Constraints
+- [Constraint 1]
+- [Constraint 2]
+- [Constraint 3]
+
+## ⚠️ Gotchas & Edge Cases
+
+- **[Issue]**: [What happened and how to handle it]
+- **[Issue]**: [What happened and how to handle it]
+
+## 📊 Integration Learnings
+
+- **API Authentication**: [Details]
+- **Rate Limiting**: [Details]
+- **Data Format**: [Details]
+- **Error Handling**: [Details]
+
+## 🛠️ Architecture Decisions
+
+- **Decision**: [Why this choice?]
+- **Decision**: [Why this choice?]
+
+## 📦 Payload Shape (Final)
+
+[Final confirmed JSON structure that will be delivered]
+
+```json
+{
+  "status": "success",
+  "data": {
+    // Your payload structure
+  },
+  "metadata": {
+    "generated_at": "2026-03-16T10:00:00Z",
+    "source": "[source]"
+  }
+}
+```
+
+---
+
+**Keep this file updated as you discover constraints and patterns.**

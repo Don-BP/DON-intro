@@ -1,0 +1,63 @@
+# Task Plan & Blueprint
+
+**Project:** [Your Project Name]
+**Created:** [Date]
+**Last Updated:** [Date]
+
+## 🎯 North Star
+
+[Singular desired outcome - one sentence]
+
+## 📋 Phases & Checklists
+
+### Phase 0: Initialization ✓
+- [ ] Discovery questions answered
+- [ ] Data schema defined in `gemini.md`
+- [ ] `findings.md` created
+- [ ] `progress.md` created
+
+### Phase 1: Blueprint
+- [ ] North Star defined
+- [ ] Integrations identified
+- [ ] Source of Truth identified
+- [ ] Delivery Payload defined
+- [ ] Behavioral Rules defined
+
+### Phase 2: Link
+- [ ] API connections verified
+- [ ] Credentials in `.env`
+- [ ] Handshake scripts tested
+- [ ] All external services responding
+
+### Phase 3: Architect
+- [ ] `architecture/` SOPs written
+- [ ] Layer 1 (SOPs) defined
+- [ ] Layer 2 (Navigation) logic mapped
+- [ ] Layer 3 (Tools) built and tested
+
+### Phase 4: Stylize
+- [ ] Output payload formatted
+- [ ] UI/UX refined (if applicable)
+- [ ] User feedback collected
+- [ ] Refinements made
+
+### Phase 5: Trigger
+- [ ] Cloud deployment ready
+- [ ] Automation triggers set
+- [ ] Maintenance log updated
+- [ ] Documentation complete
+
+## 📝 Key Discoveries
+
+[To be filled as you progress - see `findings.md`]
+
+## ⚙️ Dependencies
+
+- [ ] [External service 1]
+- [ ] [External service 2]
+- [ ] [Data source]
+- [ ] [Delivery destination]
+
+---
+
+**Next Step:** Answer the 5 Discovery Questions in Phase 1
